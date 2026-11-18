@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Vany 🎄 - Snoopy Navidad Edition</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--lo:rgb(220,38,38);--mid:rgb(16,185,129);--hi:rgb(250,204,21);--peak:rgb(255,255,255);--border:rgba(16,185,129,.35);--glow:rgba(220,38,38,.2)}
+body{background:#071318;color:var(--mid);font-family:'Share Tech Mono',monospace}
+.font-retro{font-family:'VT323',monospace}
+.bord{border-color:var(--border)!important}.dim{color:var(--mid)}.accent{color:var(--hi)}
+.led-panel{background:rgba(8,16,22,.9);border:2px solid var(--border);box-shadow:0 0 20px var(--glow),inset 0 0 15px rgba(0,0,0,.8)}
+.glow-text{color:var(--peak);text-shadow:0 0 10px var(--lo),0 0 20px var(--mid)}
+.badge{background:var(--glow);color:var(--peak);border:1px solid var(--mid)}
+.btn{background:linear-gradient(90deg,#dc2626,#059669);box-shadow:0 0 15px rgba(220,38,38,.4)}
+.btn-scene{background:linear-gradient(90deg,#0284c7,#10b981);box-shadow:0 0 15px rgba(16,185,129,.35)}
+.btn-on{background:#059669;box-shadow:0 0 15px #10b981}
+.track-card{background:rgba(16,185,129,.12);border:1px solid var(--border)}
+.ctrl{width:2.4rem;height:2.4rem;border-radius:9999px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);color:var(--peak);background:rgba(16,185,129,.15);transition:transform .15s,box-shadow .15s}
+.ctrl:hover{box-shadow:0 0 12px var(--mid)}.ctrl:active{transform:scale(.92)}
+.ctrl-main{width:2.9rem;height:2.9rem;background:linear-gradient(90deg,#dc2626,#059669);color:#fff}
+.ctrl svg{width:1.1rem;height:1.1rem;fill:currentColor}
+</style>
+</head>
+<body class="min-h-screen md:h-screen flex flex-col justify-between p-4 md:overflow-hidden" id="main-body">
+<audio id="demo-audio" crossorigin="anonymous" preload="auto"></audio>
+<header class="flex flex-wrap justify-between items-center gap-2 border-b bord pb-3">
+ <div class="flex items-center gap-3">
+  <div id="status-led" class="w-4 h-4 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_#ef4444]"></div>
+  <h1 class="text-xl md:text-2xl font-retro tracking-widest glow-text">PARA VANY 🎄 · SNOOPY NAVIDAD</h1>
+ </div>
+ <div class="flex flex-wrap items-center gap-2">
+  <span id="genre-badge" class="badge text-xs px-3 py-1 rounded-full">CASITA NAVIDEÑA 🐾</span>
+  <button id="demo-btn" class="btn text-white text-xs md:text-sm font-bold py-2 px-4 rounded-full transition-all transform active:scale-95 cursor-pointer">Música Vany 🎵</button>
+  <button id="scene-btn" class="btn-scene text-white text-xs md:text-sm font-bold py-2 px-4 rounded-full transition-all transform active:scale-95 cursor-pointer">Cambiar Ambiente 🎄</button>
+  <button id="start-btn" class="ctrl px-3 w-auto text-xs font-bold tracking-wider cursor-pointer" title="Activar micrófono">Mic 🎙️</button>
+ </div>
+</header>
+<main class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto md:h-[78vh] py-4 md:py-0">
+ <section class="led-panel rounded-2xl p-4 flex flex-col justify-between items-center relative overflow-hidden min-h-[42vh] md:min-h-0">
+  <div class="w-full flex justify-between items-center mb-2 px-2">
+   <span class="text-xs font-bold tracking-wider dim">LUCES NAVIDEÑAS LED</span>
+   <span class="text-xs font-bold tracking-wider accent" id="db-status">VOL: 0%</span>
+  </div>
+  <div class="w-full h-[30vh] md:h-[52vh] relative"><canvas id="canvas-led" class="w-full h-full rounded-lg absolute inset-0"></canvas></div>
+  <div class="track-card w-full rounded-xl p-3 mt-2 flex items-center gap-4">
+   <img id="track-art" src="" class="w-14 h-14 rounded-lg object-cover hidden">
+   <div class="overflow-hidden flex-1 min-w-0">
+    <p id="track-title" class="text-sm font-bold text-white truncate">¡Hola Vany! Toca "Música Vany 🎵"</p>
+    <p id="track-artist" class="text-xs dim truncate">Especial navideño de Snoopy</p>
+   </div>
+   <div class="flex items-center gap-2 shrink-0">
+    <button id="btn-prev" class="ctrl" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+    <button id="btn-play" class="ctrl ctrl-main" aria-label="Pausar"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button>
+    <button id="btn-next" class="ctrl" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+   </div>
+  </div>
+ </section>
+ <section class="led-panel rounded-2xl p-2 relative min-h-[46vh] md:h-full overflow-hidden flex flex-col">
+  <div class="flex justify-between items-center px-3 py-1.5 border-b bord z-10 bg-black/50 rounded-t-lg">
+   <span class="text-xs font-bold tracking-wider dim" id="scene-title">AMBIENTE: CASITA DE SNOOPY & NIEVE</span>
+   <span class="text-[11px] accent font-bold" id="scene-counter">1 / 7 · ESPECIAL VANY</span>
+  </div>
+  <div class="w-full h-full relative flex-1"><canvas id="canvas-scene" class="w-full h-full rounded-b-lg absolute inset-0"></canvas></div>
+ </section>
+</main>
+<footer class="text-center text-xs dim opacity-70 pt-2">HECHO CON CARIÑO PARA VANY 💖 · FELIZ NAVIDAD CON SNOOPY 🎄🐾❄️ · [M] ambiente · [N] canción · [Espacio] pausa</footer>
+
+<script>
+const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function hashStr(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+const rgbStr=(c,a=1)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const lerpC=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+const hexToRgb=hex=>{const n=parseInt(hex.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]};
+let SEED=42;
+const rnd=i=>{const x=Math.sin(i*127.1+SEED*311.7)*43758.5453;return x-Math.floor(x)};
+
+const AMBIENTES=[
+ {id:'casita',badge:'CASITA NAVIDEÑA 🐾',titulo:'CASITA DE SNOOPY & NIEVE',bg:'#071318',pal:['#dc2626','#10b981','#facc15','#ffffff','#0f2933']},
+ {id:'aurora',badge:'AURORA BOREAL ✨',titulo:'NOCHEBUENA & AURORA BOREAL',bg:'#050b1a',pal:['#0ea5e9','#10b981','#a855f7','#ffffff','#0f1f3d']},
+ {id:'regalos',badge:'LLUVIA DE REGALOS 🎁',titulo:'SANTA SNOOPY & REGALOS',bg:'#18070e',pal:['#e11d48','#f59e0b','#38bdf8','#ffffff','#2e101c']},
+ {id:'calido',badge:'NOCHE CÁLIDA 💖',titulo:'LUCES DORADAS & CORAZONES',bg:'#170d06',pal:['#ea580c','#facc15','#f43f5e','#fef08a','#2b190c']},
+ {id:'bosque',badge:'BOSQUE NEVADO 🌲',titulo:'BOSQUE NEVADO & LUNA',bg:'#06101a',pal:['#38bdf8','#22c55e','#e0f2fe','#ffffff','#0b1e2e']},
+ {id:'trineo',badge:'TRINEO MÁGICO 🛷',titulo:'SNOOPY EN EL TRINEO DE SANTA',bg:'#0a0620',pal:['#ef4444','#facc15','#a78bfa','#ffffff','#1a1238']},
+ {id:'patinaje',badge:'PISTA DE HIELO ⛸️',titulo:'SNOOPY PATINANDO EN HIELO',bg:'#061622',pal:['#22d3ee','#60a5fa','#f472b6','#ffffff','#0c2a3d']}
+];
+const paletaDeAmbiente=a=>({low:hexToRgb(a.pal[0]),mid:hexToRgb(a.pal[1]),high:hexToRgb(a.pal[2]),peak:hexToRgb(a.pal[3]),bgOff:hexToRgb(a.pal[4]),bg:hexToRgb(a.bg)});
+let ambIdx=0,P=paletaDeAmbiente(AMBIENTES[0]),Pt=paletaDeAmbiente(AMBIENTES[0]);
+P.dark=lerpC(P.bg,[0,0,0],.35);
+const CLAVES_PAL=['low','mid','high','peak','bgOff','bg'];
+function mezclarPaleta(){CLAVES_PAL.forEach(k=>{P[k]=lerpC(P[k],Pt[k],.06)});P.dark=lerpC(P.bg,[0,0,0],.35)}
+function aplicarPaletaCSS(){const s=document.documentElement.style;
+ s.setProperty('--lo',rgbStr(P.low));s.setProperty('--mid',rgbStr(P.mid));s.setProperty('--hi',rgbStr(P.high));
+ s.setProperty('--peak',rgbStr(P.peak));s.setProperty('--border',rgbStr(P.mid,.35));s.setProperty('--glow',rgbStr(P.low,.2));
+ document.body.style.backgroundColor=rgbStr(P.bg)}
+
+let audioCtx,analyser,dataArray,canvasLed,ctxLed,canvasScene,ctxScene,audioEl,audioSourceConectado=false;
+let frame=0,T=0;const A={bass:0,energy:0,beat:0};
+let cancionActual={titulo:'',artista:''},temaActual='casita',escenaPrev='casita',fade=1,modoDemo=false,pausado=false;
+let beatCount=0,bassProm=0,ultimoBeat=0;const picos=new Array(16).fill(0);
+
+function cambiarAmbiente(dir=1){
+ ambIdx=(ambIdx+dir+AMBIENTES.length)%AMBIENTES.length;
+ const amb=AMBIENTES[ambIdx];
+ if(amb.id!==temaActual){escenaPrev=temaActual;temaActual=amb.id;fade=0}
+ Pt=paletaDeAmbiente(amb);
+ document.getElementById('genre-badge').innerText=amb.badge;
+ document.getElementById('scene-title').innerText=`AMBIENTE: ${amb.titulo}`;
+ document.getElementById('scene-counter').innerText=`${ambIdx+1} / ${AMBIENTES.length} · ESPECIAL VANY`;
+}
+function asegurarAudioContext(){
+ if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+ if(audioCtx.state==='suspended')audioCtx.resume();
+ if(!analyser){analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=.75;dataArray=new Uint8Array(analyser.frequencyBinCount)}
+}
+function conectarAudioElement(){
+ asegurarAudioContext();
+ if(!audioSourceConectado&&audioEl){try{const s=audioCtx.createMediaElementSource(audioEl);s.connect(analyser);analyser.connect(audioCtx.destination);audioSourceConectado=true}catch(e){}}
+}
+async function iniciarMic(){
+ try{asegurarAudioContext();
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+  const btn=document.getElementById('start-btn');btn.innerText='MIC ON 🎙️';
+  btn.className='btn-on text-white px-3 py-2 rounded-full text-xs font-bold tracking-wider cursor-pointer';
+  audioCtx.createMediaStreamSource(stream).connect(analyser);
+ }catch(err){console.warn('Micrófono no capturado:',err)}
+}
+function leerAudio(){
+ if(analyser&&dataArray){
+  analyser.getByteFrequencyData(dataArray);
+  let b=0,e=0;for(let i=0;i<3;i++)b+=dataArray[i];for(let i=0;i<dataArray.length;i++)e+=dataArray[i];
+  b/=765;e/=(dataArray.length*255);
+  A.bass+=(b-A.bass)*.35;A.energy+=(e-A.energy)*.2;bassProm+=(b-bassProm)*.05;
+  if(e>.03&&b>Math.max(.22,bassProm*1.35)&&frame-ultimoBeat>14){ultimoBeat=frame;A.beat=1;beatCount++}
+ }else{A.bass=(Math.sin(frame*.08)*.5+.5)*.5;A.energy=.3;if(frame%30===0){A.beat=1;beatCount++}}
+ A.beat*=.88;
+}
+function nuevaCancion(t,a){cancionActual={titulo:t,artista:a};SEED=(hashStr(norm(t+'|'+a))%10000)/10}
+function ajustarCanvas(){
+ canvasLed=document.getElementById('canvas-led');ctxLed=canvasLed.getContext('2d');
+ canvasLed.width=canvasLed.offsetWidth||canvasLed.parentElement.clientWidth;canvasLed.height=canvasLed.offsetHeight||canvasLed.parentElement.clientHeight;
+ canvasScene=document.getElementById('canvas-scene');ctxScene=canvasScene.getContext('2d');
+ canvasScene.width=canvasScene.offsetWidth||canvasScene.parentElement.clientWidth;canvasScene.height=canvasScene.offsetHeight||canvasScene.parentElement.clientHeight;
+}
+function dibujarLED(){
+ if(!ctxLed||!canvasLed)return;
+ const w=canvasLed.width,h=canvasLed.height;ctxLed.clearRect(0,0,w,h);
+ const nB=16,nL=14,bw=(w/nB)-6,lh=(h/nL)-3;let suma=0;
+ for(let i=0;i<nB;i++){
+  let val=0;
+  if(dataArray){const a=Math.floor(Math.pow(i/nB,1.7)*90),b=Math.max(a+1,Math.floor(Math.pow((i+1)/nB,1.7)*90));
+   let s=0;for(let k=a;k<b;k++)s+=dataArray[k]||0;val=Math.min(255,(s/(b-a))*(1+i*.05))}
+  if(val<2&&!pausado)val=Math.floor(Math.abs(Math.sin(frame*.06+i*.4))*120)+25;
+  suma+=val;
+  const enc=Math.max(1,Math.floor((val/255)*nL));picos[i]=Math.max(enc,picos[i]-.1);
+  for(let j=0;j<nL;j++){
+   const x=i*(bw+6)+3,y=h-(j+1)*(lh+3);let col=P.bgOff;
+   if(j<enc){if(j>nL-3)col=P.peak;else if(i%2===0)col=lerpC(P.low,P.high,j/nL);else col=lerpC(P.mid,P.high,j/nL)}
+   ctxLed.fillStyle=rgbStr(col);ctxLed.fillRect(x,y,bw,lh);
+  }
+ }
+ document.getElementById('db-status').innerText=`VOL: ${Math.round((suma/(nB*255))*100)}%`;
+}
+
+/* ---------- Dibujo ---------- */
+function corazon(c,x,y,s){c.beginPath();c.moveTo(x,y+s*.3);c.bezierCurveTo(x,y,x-s,y,x-s,y+s*.35);c.bezierCurveTo(x-s,y+s*.75,x,y+s*.9,x,y+s*1.2);c.bezierCurveTo(x,y+s*.9,x+s,y+s*.75,x+s,y+s*.35);c.bezierCurveTo(x+s,y,x,y,x,y+s*.3);c.fill()}
+function estrella(c,x,y,ro,ri,col){c.fillStyle=col;c.beginPath();for(let i=0;i<10;i++){const r=i%2?ri:ro,a=i*Math.PI/5-Math.PI/2;c[i?'lineTo':'moveTo'](x+Math.cos(a)*r,y+Math.sin(a)*r)}c.closePath();c.fill()}
+// Une varias elipses en una sola silueta con contorno limpio (estilo caricatura)
+function uni(c,sh,fill='#fff'){
+ c.lineJoin='round';c.strokeStyle='#0f172a';c.lineWidth=3.2;
+ sh.forEach(s=>{c.beginPath();c.ellipse(s[0],s[1],s[2],s[3],s[4]||0,0,7);c.stroke()});
+ c.fillStyle=fill;sh.forEach(s=>{c.beginPath();c.ellipse(s[0],s[1],s[2],s[3],s[4]||0,0,7);c.fill()});
+}
+// Cabeza de Snoopy mirando a la izquierda, centro en (0,0)
+function cabezaSnoopy(c,hat=true){
+ uni(c,[[0,0,11,10.5],[-14,2,11,6.5,.12]]);
+ // oreja negra larga y caída
+ c.fillStyle='#0f172a';c.beginPath();c.ellipse(4,8,5,12.5,.18,0,7);c.fill();
+ // nariz grande
+ c.beginPath();c.ellipse(-25,-.5,5.2,4.4,-.2,0,7);c.fill();
+ // ojo (puntito) + ceja + sonrisa
+ c.beginPath();c.arc(-8,-2.5,1.7,0,7);c.fill();
+ c.strokeStyle='#0f172a';c.lineWidth=1.3;c.beginPath();c.moveTo(-11,-6);c.lineTo(-6,-6.5);c.stroke();
+ c.beginPath();c.arc(-15,5,5.5,.15,1.1);c.stroke();
+ if(hat){
+  c.fillStyle='#dc2626';c.strokeStyle='#0f172a';c.lineWidth=1.8;
+  c.beginPath();c.moveTo(-10,-7);c.quadraticCurveTo(0,-22,10,-17);c.lineTo(9,-6);c.closePath();c.fill();c.stroke();
+  c.fillStyle='#fff';c.beginPath();c.ellipse(0,-6.5,10.5,3,-.12,0,7);c.fill();c.stroke();
+  c.beginPath();c.arc(10,-17,3.4,0,7);c.fill();c.stroke();
+ }
+}
+function woodstock(c,x,y){
+ c.save();c.translate(x,y);c.fillStyle='#facc15';c.strokeStyle='#0f172a';c.lineWidth=1;
+ c.beginPath();c.ellipse(0,4,4.5,5,0,0,7);c.fill();c.stroke();
+ c.beginPath();c.arc(0,-2,4.5,0,7);c.fill();c.stroke();
+ c.fillStyle='#f97316';c.beginPath();c.moveTo(-4,-2);c.lineTo(-9,-1);c.lineTo(-4,1);c.fill();
+ c.fillStyle='#0f172a';c.fillRect(-2,-3.5,1.4,1.4);
+ c.fillStyle='#dc2626';c.beginPath();c.moveTo(-3,-5);c.lineTo(2,-11);c.lineTo(4,-5);c.fill();
+ c.fillStyle='#fff';c.beginPath();c.arc(2,-11.5,1.8,0,7);c.fill();c.restore();
+}
+// Snoopy acostado, cuerpo blanco, patas y cola
+function snoopyAcostado(c){
+ uni(c,[[8,-1,24,10.5],[29,1,8,7],[37,3,6.5,4.5],[-4,6,9,4,.1]]);
+ uni(c,[[35,-9,4.5,2.6,-.7]]);
+ c.strokeStyle='#0f172a';c.lineWidth=1.3;
+ [[36,-1],[38.5,0.5],[40,3]].forEach(([x,y])=>{c.beginPath();c.moveTo(x,y+2);c.lineTo(x+1,y+5);c.stroke()});
+ c.save();c.translate(-20,-8);cabezaSnoopy(c);c.restore();
+ // collar rojo + plaquita
+ c.strokeStyle='#dc2626';c.lineWidth=3.5;c.beginPath();c.moveTo(-10,-3);c.lineTo(-8,8);c.stroke();
+ c.fillStyle='#facc15';c.beginPath();c.arc(-8.5,9,2.2,0,7);c.fill();
+}
+function casitaSnoopy(c,cx,baseY,bounce,s=1.25){
+ c.save();c.translate(cx,baseY);c.scale(s,s);
+ c.fillStyle='#dc2626';c.strokeStyle='#450a0a';c.lineWidth=2;c.fillRect(-58,-52,116,52);c.strokeRect(-58,-52,116,52);
+ c.strokeStyle='rgba(69,10,10,.35)';c.lineWidth=1.5;
+ for(let y=-40;y<0;y+=12){c.beginPath();c.moveTo(-56,y);c.lineTo(56,y);c.stroke()}
+ // puerta arqueada oscura
+ c.fillStyle='#1c0a0a';c.beginPath();c.moveTo(-14,0);c.lineTo(-14,-24);c.arc(0,-24,14,Math.PI,0);c.lineTo(14,0);c.fill();
+ c.fillStyle='#ef4444';c.strokeStyle='#450a0a';c.lineWidth=2;
+ c.beginPath();c.moveTo(-72,-52);c.lineTo(0,-90);c.lineTo(72,-52);c.closePath();c.fill();c.stroke();
+ c.strokeStyle='#fff';c.lineWidth=5;c.lineCap='round';
+ c.beginPath();c.moveTo(-72,-52);c.lineTo(0,-90);c.lineTo(72,-52);c.stroke();
+ const cols=['#ef4444','#facc15','#22c55e','#38bdf8'];
+ for(let i=-5;i<=5;i++){const on=Math.floor(T*.1+i)%2===0;c.fillStyle=cols[Math.abs(i)%4];c.globalAlpha=on?1:.35;c.beginPath();c.arc(i*11.5,-49+Math.abs(i%2)*3.5,3.2,0,7);c.fill()}
+ c.globalAlpha=1;
+ c.save();c.translate(4,-98-bounce*4);snoopyAcostado(c);woodstock(c,14,-17-Math.abs(Math.sin(T*.1))*5);c.restore();
+ c.restore();
+}
+function snoopyPatinador(c,x,y,dir,s){
+ c.save();c.translate(x,y);c.scale(dir*s,s);
+ const sw=Math.sin(T*.12)*5;
+ uni(c,[[0,-30,13,19],[-5+sw*.3,-9,4.2,9],[7-sw*.3,-9,4.2,9],[-9+sw*.3,-1,7,3.8],[4-sw*.3,-1,7,3.8],[-12,-32,4,10,.7+sw*.05],[12,-30,4,10,-.7-sw*.05]]);
+ c.strokeStyle='#cbd5e1';c.lineWidth=1.6;
+ c.beginPath();c.moveTo(-17+sw*.3,3);c.lineTo(4+sw*.3,3);c.moveTo(-4-sw*.3,3);c.lineTo(17-sw*.3,3);c.stroke();
+ c.save();c.translate(-2,-58);cabezaSnoopy(c);c.restore();
+ c.fillStyle='#dc2626';c.fillRect(-9,-47,16,5);c.fillRect(6,-47,4,13); // bufanda
+ c.restore();
+}
+function arbolNavidad(c,x,baseY,s,luces=true){
+ c.save();c.translate(x,baseY);c.scale(s,s);
+ c.fillStyle='#78350f';c.fillRect(-8,-18,16,18);
+ for(let i=0;i<3;i++){const yO=-18-i*26,wd=42-i*9;c.fillStyle=i%2?'#047857':'#065f46';c.beginPath();c.moveTo(-wd,yO);c.lineTo(0,yO-38);c.lineTo(wd,yO);c.fill()}
+ const ce=['#ef4444','#facc15','#38bdf8','#f472b6'];
+ [[-18,-26],[16,-28],[-11,-50],[13,-53],[-5,-74],[7,-77]].forEach(([ex,ey],i)=>{
+  c.globalAlpha=Math.sin(T*.08+i)>0?1:.4;c.fillStyle=ce[i%4];c.beginPath();c.arc(ex,ey,3.8,0,7);c.fill()});
+ c.globalAlpha=1;estrella(c,0,-115,9+A.bass*3,4,'#facc15');
+ c.restore();
+}
+function pino(c,x,y,s,col){c.fillStyle=col;for(let i=0;i<3;i++){c.beginPath();c.moveTo(x-s*(.5-i*.1),y-s*i*.35);c.lineTo(x,y-s*(.7+i*.35));c.lineTo(x+s*(.5-i*.1),y-s*i*.35);c.fill()}}
+function regaloCaja(c,x,y,s,col){c.fillStyle=col;c.fillRect(x-s,y-s,s*2,s*2);c.fillStyle='#facc15';c.fillRect(x-s*.15,y-s,s*.3,s*2);c.fillRect(x-s,y-s*.15,s*2,s*.3)}
+function nieve(c,w,h,n){c.fillStyle='rgba(255,255,255,.85)';for(let i=0;i<n;i++){const sp=.6+rnd(i+50)*1.2,y=(T*sp+rnd(i+90)*h)%h,x=(rnd(i)*w+Math.sin(T*.02+i)*20+w)%w;c.beginPath();c.arc(x,y,1.5+rnd(i+10)*2.5,0,7);c.fill()}}
+function suelo(c,w,h,col='#f8fafc'){c.fillStyle=col;c.beginPath();c.moveTo(0,h-12);c.quadraticCurveTo(w*.25,h-20,w*.5,h-12);c.quadraticCurveTo(w*.75,h-4,w,h-14);c.lineTo(w,h);c.lineTo(0,h);c.fill()}
+function estrellasCielo(c,w,h,n=40){for(let i=0;i<n;i++){c.fillStyle=`rgba(250,240,170,${Math.abs(Math.sin(T*.03+i))*.8})`;c.fillRect(rnd(i+10)*w,rnd(i+200)*h*.55,2,2)}}
+function luna(c,x,y,r){const g=c.createRadialGradient(x,y,r*.5,x,y,r*2.2);g.addColorStop(0,'rgba(254,240,138,.35)');g.addColorStop(1,'rgba(254,240,138,0)');c.fillStyle=g;c.fillRect(x-r*3,y-r*3,r*6,r*6);c.fillStyle='#fef9c3';c.beginPath();c.arc(x,y,r,0,7);c.fill()}
+function titulo(c,w,txt,col){c.fillStyle=col;c.font='bold 16px "Share Tech Mono",monospace';c.textAlign='center';c.fillText(txt,w*.5,28)}
+function renoRoja(c,x,y,t){ // reno volando hacia la derecha
+ c.save();c.translate(x,y);c.strokeStyle='#78350f';c.lineWidth=3;c.lineCap='round';
+ const k=Math.sin(t)*7;
+ c.beginPath();c.moveTo(-8,8);c.lineTo(-14+k,20);c.moveTo(-4,8);c.lineTo(-8-k,21);c.moveTo(10,8);c.lineTo(16+k,19);c.moveTo(14,8);c.lineTo(20-k,20);c.stroke();
+ c.fillStyle='#92400e';c.beginPath();c.ellipse(2,2,16,8,0,0,7);c.fill();
+ c.beginPath();c.ellipse(20,-8,6,5,.3,0,7);c.fill();c.beginPath();c.moveTo(16,-4);c.lineTo(14,6);c.lineTo(20,2);c.fill();
+ c.strokeStyle='#d6d3d1';c.lineWidth=1.6;c.beginPath();c.moveTo(20,-12);c.lineTo(18,-20);c.moveTo(18,-17);c.lineTo(14,-19);c.moveTo(23,-12);c.lineTo(26,-19);c.stroke();
+ c.fillStyle='#ef4444';c.shadowColor='#ef4444';c.shadowBlur=8;c.beginPath();c.arc(26,-7,2.4,0,7);c.fill();c.shadowBlur=0;c.restore();
+}
+
+const ESCENAS={
+ casita(c,w,h){
+  c.fillStyle=rgbStr(P.dark);c.fillRect(0,0,w,h);estrellasCielo(c,w,h);suelo(c,w,h);
+  const e=Math.min(1.25,w/420);arbolNavidad(c,w*.18,h-10,e*.9);casitaSnoopy(c,w*.62,h-10,A.bass,e);nieve(c,w,h,55);
+  titulo(c,w,'FELIZ NAVIDAD VANY 🎄💖','#fff');
+ },
+ aurora(c,w,h){
+  c.fillStyle=rgbStr(P.dark);c.fillRect(0,0,w,h);
+  for(let b=0;b<3;b++){const g=c.createLinearGradient(0,h*.1,0,h*.55);g.addColorStop(0,'rgba(16,185,129,0)');
+   g.addColorStop(.5,b%2===0?'rgba(16,185,129,.25)':'rgba(56,189,248,.22)');g.addColorStop(1,'rgba(168,85,247,0)');
+   c.fillStyle=g;c.beginPath();c.moveTo(0,h*.45);
+   for(let x=0;x<=w;x+=20)c.lineTo(x,h*(.22+b*.06)+Math.sin(x*.012+T*.03+b)*(22+A.bass*25));
+   c.lineTo(w,h*.6);c.lineTo(0,h*.6);c.fill()}
+  luna(c,w*.82,52,20+A.bass*3);suelo(c,w,h);
+  const e=Math.min(1.25,w/420);arbolNavidad(c,w*.18,h-10,e*.9);casitaSnoopy(c,w*.62,h-10,A.bass,e);nieve(c,w,h,45);
+  titulo(c,w,'NOCHEBUENA MÁGICA PARA VANY ✨🐾','#fef08a');
+ },
+ regalos(c,w,h){
+  c.fillStyle=rgbStr(P.dark);c.fillRect(0,0,w,h);
+  const bc=['#ef4444','#10b981','#3b82f6','#f59e0b'];
+  for(let i=0;i<14;i++){const y=(T*(.8+rnd(i)*.9)+rnd(i+30)*h)%h,x=(rnd(i+15)*w+Math.sin(T*.02+i)*15+w)%w;regaloCaja(c,x,y,7,bc[i%4])}
+  suelo(c,w,h);const e=Math.min(1.25,w/420);
+  casitaSnoopy(c,w*.5,h-10,A.bass,e*1.1);
+  [[.2,12,'#ef4444'],[.27,9,'#3b82f6'],[.8,13,'#10b981'],[.74,9,'#f59e0b']].forEach(([px,s,col])=>regaloCaja(c,w*px,h-10-s,s*e,col));
+  titulo(c,w,'REGALOS NAVIDEÑOS PARA VANY 🎁🐾','#fda4af');
+ },
+ calido(c,w,h){
+  c.fillStyle=rgbStr(P.dark);c.fillRect(0,0,w,h);
+  const g=c.createRadialGradient(w*.5,h*.5,10,w*.5,h*.5,w*.55);g.addColorStop(0,'rgba(250,204,21,.22)');g.addColorStop(1,'rgba(234,88,12,0)');
+  c.fillStyle=g;c.fillRect(0,0,w,h);
+  const cols=['#f43f5e','#facc15','#fb7185'];
+  for(let i=0;i<16;i++){const p=((T*.004*(.6+rnd(i+1)))+rnd(i+2))%1,y=h-p*(h+40),x=rnd(i+3)*w+Math.sin(T*.03+i)*18;
+   c.fillStyle=cols[i%3];c.globalAlpha=Math.sin(p*Math.PI)*.85;corazon(c,x,y,7+rnd(i+4)*9+A.bass*5)}
+  c.globalAlpha=1;suelo(c,w,h);const e=Math.min(1.25,w/420);casitaSnoopy(c,w*.5,h-10,A.bass,e*1.1);
+  titulo(c,w,'CON MUCHO CARIÑO PARA VANY 💖🎄','#fef08a');
+ },
+ bosque(c,w,h){
+  const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#030a14');g.addColorStop(1,'#0e2a3f');c.fillStyle=g;c.fillRect(0,0,w,h);
+  estrellasCielo(c,w,h,60);luna(c,w*.78,60,24);
+  c.fillStyle='#16384f';c.beginPath();c.moveTo(0,h*.7);[[.15,.4],[.3,.62],[.5,.35],[.72,.6],[.9,.42],[1,.65]].forEach(([x,y])=>c.lineTo(w*x,h*y));c.lineTo(w,h);c.lineTo(0,h);c.fill();
+  for(let i=0;i<9;i++)pino(c,w*(.04+i*.115),h*.78,50+rnd(i)*30,i%2?'#0b3b2c':'#0f4d38');
+  suelo(c,w,h);const e=Math.min(1.25,w/420);
+  casitaSnoopy(c,w*.6,h-10,A.bass,e);arbolNavidad(c,w*.2,h-10,e*.9);nieve(c,w,h,70);
+  titulo(c,w,'NOCHE SILENCIOSA, VANY 🌲🌙','#bae6fd');
+ },
+ trineo(c,w,h){
+  const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#05031a');g.addColorStop(1,'#241552');c.fillStyle=g;c.fillRect(0,0,w,h);
+  estrellasCielo(c,w,h*1.4,70);luna(c,w*.25,h*.3,34+A.bass*3);
+  const x=((T*1.3)%(w+420))-300,y=h*.45+Math.sin(T*.04)*14-A.bass*10;
+  // estela mágica
+  for(let i=0;i<22;i++){const px=x-i*14,py=y+6+Math.sin(T*.04-i*.3)*6;estrella(c,px,py,5-i*.18,2,`rgba(250,204,21,${.8-i*.035})`)}
+  const t=T*.18;renoRoja(c,x+140,y-6,t);renoRoja(c,x+95,y-2,t+1);
+  c.strokeStyle='#facc15';c.lineWidth=1.5;c.beginPath();c.moveTo(x+95,y+3);c.lineTo(x+20,y+8);c.stroke();
+  // trineo
+  c.fillStyle='#dc2626';c.strokeStyle='#450a0a';c.lineWidth=2;
+  c.beginPath();c.moveTo(x-30,y-4);c.lineTo(x+40,y-4);c.quadraticCurveTo(x+34,y+22,x+10,y+24);c.lineTo(x-24,y+24);c.quadraticCurveTo(x-34,y+10,x-30,y-4);c.fill();c.stroke();
+  c.strokeStyle='#facc15';c.lineWidth=3;c.beginPath();c.moveTo(x-34,y+32);c.lineTo(x+30,y+32);c.quadraticCurveTo(x+46,y+32,x+44,y+20);c.stroke();
+  c.beginPath();c.moveTo(x-18,y+24);c.lineTo(x-18,y+32);c.moveTo(x+14,y+24);c.lineTo(x+14,y+32);c.stroke();
+  regaloCaja(c,x-14,y-10,8,'#10b981');regaloCaja(c,x-30,y-8,6,'#3b82f6');
+  c.save();c.translate(x+18,y-6);c.scale(.95,.95);cabezaSnoopy(c);c.restore();
+  woodstock(c,x+34,y-18);
+  nieve(c,w,h,30);suelo(c,w,h);
+  titulo(c,w,'¡SANTA SNOOPY LLEGA CON REGALOS! 🛷🎁','#fde68a');
+ },
+ patinaje(c,w,h){
+  const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#030c16');g.addColorStop(1,'#0c2a3d');c.fillStyle=g;c.fillRect(0,0,w,h);
+  estrellasCielo(c,w,h,50);
+  const e=Math.min(1.25,w/420);
+  arbolNavidad(c,w*.1,h*.62,e*.7);arbolNavidad(c,w*.9,h*.62,e*.7);
+  // guirnalda de luces
+  for(let i=0;i<=20;i++){const x=w*i/20,y=50+Math.sin(i*.9)*8;c.fillStyle=['#ef4444','#facc15','#22c55e','#38bdf8'][i%4];c.globalAlpha=Math.floor(T*.08+i)%2?1:.4;c.beginPath();c.arc(x,y,3.4,0,7);c.fill()}
+  c.globalAlpha=1;
+  // pista de hielo
+  const gh=c.createLinearGradient(0,h*.6,0,h);gh.addColorStop(0,'#7dd3fc');gh.addColorStop(1,'#e0f2fe');
+  c.fillStyle=gh;c.beginPath();c.ellipse(w*.5,h*.8,w*.46,h*.17,0,0,7);c.fill();
+  c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.2;c.beginPath();c.ellipse(w*.5,h*.8,w*.46,h*.17,0,0,7);c.stroke();
+  const ph=T*.016,sx=w*.5+Math.sin(ph)*w*.3,dir=Math.cos(ph)>0?-1:1;
+  // estela de hielo
+  for(let i=1;i<14;i++){c.fillStyle=`rgba(255,255,255,${.5-i*.035})`;c.beginPath();c.arc(sx-(-dir)*i*7,h*.84+Math.sin(i)*1,2.2,0,7);c.fill()}
+  snoopyPatinador(c,sx,h*.84,dir,e*1.25);
+  woodstock(c,sx+dir*-25*e,h*.72-Math.abs(Math.sin(T*.1))*8);
+  nieve(c,w,h,60);titulo(c,w,'PATINANDO CON VANY ⛸️❄️','#bae6fd');
+ }
+};
+function dibujarEscena(){
+ if(!ctxScene||!canvasScene)return;
+ const w=canvasScene.width,h=canvasScene.height;if(!w||!h)return;
+ const prev=ESCENAS[escenaPrev]||ESCENAS.casita,curr=ESCENAS[temaActual]||ESCENAS.casita;
+ if(fade<1){prev(ctxScene,w,h);fade=Math.min(1,fade+.03);ctxScene.save();ctxScene.globalAlpha=fade;curr(ctxScene,w,h);ctxScene.restore()}
+ else curr(ctxScene,w,h);
+}
+function loop(){requestAnimationFrame(loop);frame++;leerAudio();T+=pausado?.25:1+A.bass*.8;mezclarPaleta();if(frame%2===0)aplicarPaletaCSS();dibujarLED();dibujarEscena()}
+
+function mostrarPista(t,a,arte){
+ document.getElementById('track-title').innerText=t;document.getElementById('track-artist').innerText=a;
+ const img=document.getElementById('track-art');if(arte){img.src=arte;img.classList.remove('hidden')}else img.classList.add('hidden');
+}
+async function consultarSpotify(){
+ if(modoDemo)return;
+ try{const d=await(await fetch('/currently-playing')).json();if(!d.title)return;
+  mostrarPista(d.title,d.artist,d.albumArt);
+  if(d.title!==cancionActual.titulo||d.artist!==cancionActual.artista)nuevaCancion(d.title,d.artist)}catch(e){}
+}
+const PLAYLIST_NAVIDAD=[['All I Want for Christmas Is You','Mariah Carey'],['Last Christmas','Wham!'],['Santa Tell Me','Ariana Grande'],['Jingle Bell Rock','Bobby Helms'],['Snowman','Sia'],["It's Beginning to Look a Lot Like Christmas",'Michael Bublé'],['Let It Snow! Let It Snow! Let It Snow!','Dean Martin'],['Mistletoe','Justin Bieber']];
+let demoIdx=-1;
+async function reproducirPreviewItunes(t,a){
+ conectarAudioElement();
+ try{const res=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(t+' '+a)}&media=music&entity=song&limit=1`);
+  const data=await res.json();
+  if(data.results&&data.results.length){const tr=data.results[0];
+   mostrarPista(t,a,tr.artworkUrl100?tr.artworkUrl100.replace('100x100','300x300'):null);
+   if(tr.previewUrl){audioEl.src=tr.previewUrl;await audioEl.play()}}
+ }catch(err){console.warn('No se pudo cargar el audio preview:',err)}
+}
+function cargarNavidadVany(dir=1){
+ modoDemo=true;pausado=false;actualizarIconoPlay();
+ demoIdx=(demoIdx+dir+PLAYLIST_NAVIDAD.length)%PLAYLIST_NAVIDAD.length;
+ const[t,a]=PLAYLIST_NAVIDAD[demoIdx];mostrarPista(t,a,null);nuevaCancion(t,a);reproducirPreviewItunes(t,a);
+}
+const ICO_PAUSA='<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>',ICO_PLAY='<svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>';
+function actualizarIconoPlay(){document.getElementById('btn-play').innerHTML=pausado?ICO_PLAY:ICO_PAUSA}
+async function enviarControl(a){try{await fetch(`/player/${a}`,{method:'POST'})}catch(e){}}
+async function alternarPausa(){
+ pausado=!pausado;actualizarIconoPlay();
+ if(modoDemo&&audioEl){pausado?audioEl.pause():audioEl.play().catch(()=>{})}
+ else await enviarControl(pausado?'pause':'play');
+}
+async function saltar(dir){
+ if(modoDemo){cargarNavidadVany(dir);return}
+ await enviarControl(dir>0?'next':'previous');setTimeout(consultarSpotify,500);
+}
+document.addEventListener('keydown',e=>{
+ const k=e.key.toLowerCase();
+ if(k==='n')cargarNavidadVany(1);else if(k==='m')cambiarAmbiente(1);
+ else if(k===' '){e.preventDefault();alternarPausa()}
+ else if(k==='arrowright')saltar(1);else if(k==='arrowleft')saltar(-1);
+});
+document.addEventListener('DOMContentLoaded',()=>{
+ audioEl=document.getElementById('demo-audio');
+ audioEl.addEventListener('ended',()=>cargarNavidadVany(1));
+ document.getElementById('start-btn').addEventListener('click',iniciarMic);
+ document.getElementById('demo-btn').addEventListener('click',()=>cargarNavidadVany(1));
+ document.getElementById('scene-btn').addEventListener('click',()=>cambiarAmbiente(1));
+ document.getElementById('btn-play').addEventListener('click',alternarPausa);
+ document.getElementById('btn-prev').addEventListener('click',()=>saltar(-1));
+ document.getElementById('btn-next').addEventListener('click',()=>saltar(1));
+ window.addEventListener('resize',ajustarCanvas);
+ setTimeout(()=>{ajustarCanvas();requestAnimationFrame(loop)},100);
+ setInterval(consultarSpotify,1000);
+});
+</script>
+</body>
+</html>
